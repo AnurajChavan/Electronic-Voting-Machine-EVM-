@@ -1,8 +1,119 @@
-🗳️ Electronic Voting Machine (EVM) using Verilog HDLAn advanced, FSM-driven digital Electronic Voting Machine implemented in Verilog HDL. This project models a secure, multi-candidate voting system featuring automated vote-tallying, dynamic state control, and an intelligent winner-determination logic block.Developed and verified using the AMD Vivado Design Suite.🚀 Key FeaturesThree-Candidate Support: Out-of-the-box tracking for Candidates A, B, and C.FSM-Controlled Pipeline: Structured progression from initialization to live voting and final tallying.Smart Result Generation: Hardware-level magnitude comparators automatically determine and encode the winner.Tie-Detection Logic: Built-in resolution handling that flags a tie if no single candidate holds a majority.Robust Verification: Comprehensive testbench covering edge cases like simultaneous button presses and system resets.📐 System Architecture🔄 Finite State Machine (FSM) TopographyThe system's core logic transitions through three distinct operational phases to ensure data integrity:    [ IDLE ]  ---( start = 1 )--->  [ VOTING ]  ---( result = 1 )--->  [ RESULT ]
+# 🗳️ Electronic Voting Machine (EVM) using Verilog HDL
+
+An advanced, FSM-driven digital Electronic Voting Machine implemented in Verilog HDL. This project models a secure, multi-candidate voting system featuring automated vote-tallying, dynamic state control, and an intelligent winner-determination logic block.
+
+Developed and verified using the **AMD Vivado Design Suite**.
+
+---
+
+## 🚀 Key Features
+
+* **Three-Candidate Support:** Out-of-the-box tracking for Candidates A, B, and C.
+* **FSM-Controlled Pipeline:** Structured progression from initialization to live voting and final tallying.
+* **Smart Result Generation:** Hardware-level magnitude comparators automatically determine and encode the winner.
+* **Tie-Detection Logic:** Built-in resolution handling that flags a tie if no single candidate holds a majority.
+* **Robust Verification:** Comprehensive testbench covering edge cases like simultaneous button presses and system resets.
+
+---
+
+## 📐 System Architecture
+
+### 🔄 Finite State Machine (FSM) Topography
+
+The system's core logic transitions through three distinct operational phases to ensure data integrity:
+
+```
+    [ IDLE ]  ---( start = 1 )--->  [ VOTING ]  ---( result = 1 )--->  [ RESULT ]
        ^                                                                   |
        |___________________________( reset = 1 )___________________________|
-IDLE (00): System is cleared; waits for the authorized start signal.VOTING (01): Active phase. Listens for user inputs and securely increments candidate registers.RESULT (10): Voting inhibits automatically. Comparator logic evaluates registers to freeze and display the winner.🔌 Pin Out ConfigurationInputsSignal NameWidthTypeDescriptionclk1-bitInputMaster System Clockreset1-bitInputSynchronous system reset (Active High)start1-bitInputInitiates the VOTING phasevote_a1-bitInputPulse trigger to vote for Candidate Avote_b1-bitInputPulse trigger to vote for Candidate Bvote_c1-bitInputPulse trigger to vote for Candidate Cresult1-bitInputTerminates voting and triggers RESULT phaseOutputsSignal NameWidthTypeDescriptioncount_a8-bitOutputTotal register count for Candidate Acount_b8-bitOutputTotal register count for Candidate Bcount_c8-bitOutputTotal register count for Candidate Cwinner2-bitOutputEncoded winning candidate output🏆 Winner Binary EncodingWhen the system enters the RESULT state, the winner bus is decoded as follows:Binary CodeInterpretationCondition2'b00🤝 TieNo single majority winner2'b01🥇 Candidate Acount_a is strictly greater than B and C2'b10🥇 Candidate Bcount_b is strictly greater than A and C2'b11🥇 Candidate Ccount_c is strictly greater than A and B📊 Verification & Test ScenarioThe RTL architecture was validated against rigorous test cases via the Vivado Simulator.Sample Test Case ProfileInput Setup: Candidate A receives 2 votes, Candidate B receives 1 vote, and Candidate C receives 3 votes.MetricCandidate ACandidate BCandidate CVotes Cast00000010 (2)00000001 (1)00000011 (3)Expected Behavior: Upon triggering the result line, the system transitions to state RESULT, locks the tally registers, and outputs winner = 2'b11 (Candidate C).🛠️ Toolchain & Directory StructureLanguage: Verilog HDL (IEEE 1364-2005)IDE: AMD Vivado Design SuiteSimulation Engine: Vivado SimulatorBash📂 EVM-Verilog-Project
+
+```
+
+* **`IDLE` (00):** System is cleared; waits for the authorized `start` signal.
+* **`VOTING` (01):** Active phase. Listens for user inputs and securely increments candidate registers.
+* **`RESULT` (10):** Voting inhibits automatically. Comparator logic evaluates registers to freeze and display the winner.
+
+### 🔌 Pin Out Configuration
+
+#### **Inputs**
+
+| Signal Name | Width | Type | Description |
+| --- | --- | --- | --- |
+| `clk` | 1-bit | Input | Master System Clock |
+| `reset` | 1-bit | Input | Synchronous system reset (Active High) |
+| `start` | 1-bit | Input | Initiates the `VOTING` phase |
+| `vote_a` | 1-bit | Input | Pulse trigger to vote for Candidate A |
+| `vote_b` | 1-bit | Input | Pulse trigger to vote for Candidate B |
+| `vote_c` | 1-bit | Input | Pulse trigger to vote for Candidate C |
+| `result` | 1-bit | Input | Terminates voting and triggers `RESULT` phase |
+
+#### **Outputs**
+
+| Signal Name | Width | Type | Description |
+| --- | --- | --- | --- |
+| `count_a` | 8-bit | Output | Total register count for Candidate A |
+| `count_b` | 8-bit | Output | Total register count for Candidate B |
+| `count_c` | 8-bit | Output | Total register count for Candidate C |
+| `winner` | 2-bit | Output | Encoded winning candidate output |
+
+---
+
+## 🏆 Winner Binary Encoding
+
+When the system enters the `RESULT` state, the `winner` bus is decoded as follows:
+
+| Binary Code | Interpretation | Condition |
+| --- | --- | --- |
+| **`2'b00`** | 🤝 **Tie** | No single majority winner |
+| **`2'b01`** | 🥇 **Candidate A** | `count_a` is strictly greater than B and C |
+| **`2'b10`** | 🥇 **Candidate B** | `count_b` is strictly greater than A and C |
+| **`2'b11`** | 🥇 **Candidate C** | `count_c` is strictly greater than A and B |
+
+---
+
+## 📊 Verification & Test Scenario
+
+The RTL architecture was validated against rigorous test cases via the Vivado Simulator.
+
+### **Sample Test Case Profile**
+
+> **Input Setup:** Candidate A receives 2 votes, Candidate B receives 1 vote, and Candidate C receives 3 votes.
+
+| Metric | Candidate A | Candidate B | Candidate C |
+| --- | --- | --- | --- |
+| **Votes Cast** | `00000010` (2) | `00000001` (1) | `00000011` (3) |
+
+* **Expected Behavior:** Upon triggering the `result` line, the system transitions to state `RESULT`, locks the tally registers, and outputs **`winner = 2'b11`** (Candidate C).
+
+---
+
+## 🛠️ Toolchain & Directory Structure
+
+* **Language:** Verilog HDL (IEEE 1364-2005)
+* **IDE:** AMD Vivado Design Suite
+* **Simulation Engine:** Vivado Simulator
+
+```bash
+📂 EVM-Verilog-Project
  ├── 📜 evm.v          # Top-level RTL hardware architecture
  ├── 📜 evm_tb.v       # Self-checking testbench file
  └── 📜 README.md      # Project documentation
-🔮 Roadmap & Future EnhancementsTo bring this prototype closer to an industrial-grade hardware implementation, the following updates are planned:[ ] Debounce Logic Integration: Add hardware debouncing circuits to handle noisy mechanical push-buttons from an FPGA board.[ ] Voter Authentication: Integrate a 1-vote-per-voter locking mechanism using a secondary "Voter ID Enabled" signal.[ ] Visual Interface: Map the 8-bit count outputs to an array of onboard Seven-Segment Displays.[ ] Security Protocols: Protect the RESULT state behind a digital password/keypad interface.👨‍💻 Learning OutcomesThis project serves as a comprehensive study in Hardware Description Languages (HDL), demonstrating proficiency in synchronous sequential circuit design, binary structural/behavioral modeling, and rigorous RTL simulation workflows.
+
+```
+
+---
+
+## 🔮 Roadmap & Future Enhancements
+
+To bring this prototype closer to an industrial-grade hardware implementation, the following updates are planned:
+
+* [ ] **Debounce Logic Integration:** Add hardware debouncing circuits to handle noisy mechanical push-buttons from an FPGA board.
+* [ ] **Voter Authentication:** Integrate a 1-vote-per-voter locking mechanism using a secondary "Voter ID Enabled" signal.
+* [ ] **Visual Interface:** Map the 8-bit count outputs to an array of onboard **Seven-Segment Displays**.
+* [ ] **Security Protocols:** Protect the `RESULT` state behind a digital password/keypad interface.
+
+---
+
+### 👨‍💻 Learning Outcomes
+
+This project serves as a comprehensive study in **Hardware Description Languages (HDL)**, demonstrating proficiency in synchronous sequential circuit design, binary structural/behavioral modeling, and rigorous RTL simulation workflows.
