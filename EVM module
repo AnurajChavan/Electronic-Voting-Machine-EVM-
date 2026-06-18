@@ -1,0 +1,71 @@
+module evm(
+    input clk,
+    input reset,
+    input start,
+    input vote_a,
+    input vote_b,
+    input vote_c,
+    input result,
+
+    output reg [7:0] count_a,
+    output reg [7:0] count_b,
+    output reg [7:0] count_c,
+    output reg [1:0] winner
+);
+
+parameter IDLE   = 2'b00;
+parameter VOTING = 2'b01;
+parameter RESULT = 2'b10;
+
+reg [1:0] state;
+
+always @(posedge clk or posedge reset)
+begin
+    if(reset)
+    begin
+        state   <= IDLE;
+        count_a <= 0;
+        count_b <= 0;
+        count_c <= 0;
+        winner  <= 0;
+    end
+    else
+    begin
+        case(state)
+
+        IDLE:
+        begin
+            if(start)
+                state <= VOTING;
+        end
+
+        VOTING:
+        begin
+            if(vote_a)
+                count_a <= count_a + 1;
+            else if(vote_b)
+                count_b <= count_b + 1;
+            else if(vote_c)
+                count_c <= count_c + 1;
+
+            if(result)
+                state <= RESULT;
+        end
+
+        RESULT:
+        begin
+            if((count_a > count_b) && (count_a > count_c))
+                winner <= 2'b01;
+            else if((count_b > count_a) && (count_b > count_c))
+                winner <= 2'b10;
+            else if((count_c > count_a) && (count_c > count_b))
+                winner <= 2'b11;
+            else
+                winner <= 2'b00;
+        end
+
+        endcase
+    end
+end
+
+endmodule
